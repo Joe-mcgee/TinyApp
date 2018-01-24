@@ -7,12 +7,12 @@
 <%- include ./partials/__header.ejs %>
 <table>
   <tr>
-    <th>Shortened From</th>
-    <th>Original Url</th>
+    <th>ShortURL: </th>
+    <td><%= shortURL %></td>
   </tr>
   <tr>
-    <td><%= shortURL %></td>
-    <td><%= longURL %></td>
+    <td><form method='POST' action='<%= shortURL %>' id='Update'><input type='text' name='newurl' value='<%= longURL%>'> </form></td>
+    <td><button type='submit' type='text' name='' form='Update'>Update</button></td>
   </tr>
 </table>
 
