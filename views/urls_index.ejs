@@ -5,6 +5,7 @@
 </head>
 <body>
 <%- include ./partials/__header.ejs %>
+
 <table>
   <tr>
     <th>Shortened From</th>
@@ -14,6 +15,8 @@
     <tr>
       <td><%= url %></td>
       <td><%= urls[url]%></td>
+      <td><form method="POST" action='urls/<%=url%>/delete' id="delete<%= url%>"></form>
+      <button type='submit' type='text' name='delete' form="delete<%= url %>">Delete</button></td>
     </tr>
   <% } %>
 </table>
