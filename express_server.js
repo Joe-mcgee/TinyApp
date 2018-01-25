@@ -153,9 +153,25 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-
   let templateVars = { shortURL: req.params.id, longURL: urlDatabase[req.params.id], user: req.cookies['user'] };
-  res.render("urls_show", templateVars);
+  let pass = false;
+  for (id in urlDatabase) {
+    let targetId = id;
+    for (list in urlDatabase[id]) {
+      if (templateVars['shortURL'] === list) {
+        if (targetId === templateVars['user']['id']) {
+          pass = true;
+          res.render("urls_show", templateVars);
+        }
+      }
+    }
+  }
+  if (!pass) {
+    res.sendStatus(403)
+  }
+
+
+
 });
 
 app.post("/urls/:id", (req, res) => {
