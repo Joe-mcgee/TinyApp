@@ -11,8 +11,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser())
 
 var urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  'userRandomID': { "b2xVn2": "http://www.lighthouselabs.ca",
+                    "c3vVn3": 'http://www.apple.com' },
+  'user2RandomID': { "9sm5xK": "http://www.google.com" }
 };
 
 const users = {
@@ -27,6 +28,17 @@ const users = {
     password: "dishwasher-funk"
   }
 }
+
+function getUrls(user) {
+  let output;
+  for (id in urlDatabase) {
+    if (user['id'] === id) {
+      output = (urlDatabase[id]);
+    }
+  }
+  return output;
+}
+
 
 
 function generateRandomString() {
@@ -97,9 +109,9 @@ app.post('/login', (req, res) => {
 });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('user')
-  res.redirect('/login')
-})
+  res.clearCookie('user');
+  res.redirect('/login');
+});
 
 app.get("/", (req, res) => {
   let templateVars = {
@@ -117,10 +129,15 @@ app.get("/urls.json", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-  user: req.cookies["user"]
+    user: req.cookies["user"]
 
-};
-  res.render("urls_new", templateVars);
+  };
+  console.log(templateVars['user'])
+  if (typeof templateVars['user'] === 'undefined') {
+    res.redirect('/login');
+     } else {
+    res.render("urls_new", templateVars);
+  }
 });
 
 
@@ -129,7 +146,9 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase,  user: req.cookies['user'] };
+  let user = req.cookies['user']
+  let urls = getUrls(user)
+  let templateVars = { urls: urls,  'user': req.cookies['user'] };
   res.render("urls_index", templateVars);
 });
 
@@ -141,7 +160,7 @@ app.get("/urls/:id", (req, res) => {
 
 app.post("/urls/:id", (req, res) => {
   urlDatabase[req.params.id] = req.body.newurl;
-  res.redirect('/urls')
+  res.redirect('/urls');
 
 });
 
@@ -157,15 +176,17 @@ app.post("/urls", (req, res) => {
   let templateVars = {
   user: req.cookies["user"]
 };
+  console.log(templateVars['user'])
   let random = generateRandomString();
   let input = req.body['longURL'];
   let httpRegex = RegExp('^http://');
+  console.log(urlDatabase[templateVars['user']])
   if (httpRegex.test(input)) {
-    urlDatabase[random] = req.body['longURL'];
+    urlDatabase[templateVars['user']][random] = input;
   } else {
     urlDatabase[random] = 'http://' + input;
   }
-  res.redirect(`urls/${random}`, templateVars);
+  res.redirect(`urls/${random}`);
 });
 
 app.get("/u/:shortURL", (req, res) => {
