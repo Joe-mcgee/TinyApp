@@ -62,20 +62,38 @@ app.post('/register', (req, res) => {
     res.redirect('urls');
 
   } else {
-    res.status(400);
+    res.sendStatus(400);
     res.redirect('register')
   }
 });
 
 
 app.get('/login', (req, res) => {
-  let templateVars = {user: req.cookies['user']}
-res.render('login', templateVars)
-})
+res.render('login');
+});
 
 app.post('/login', (req, res) => {
-  res.cookie('user', req.body.user);
-  res.redirect('/urls');
+  let email = req.body.email;
+  let password = req.body.password;
+  let passed = false;
+  if (email !== '' || password !== '') {
+    for (id in users) {
+      if (users[id]['email'] === email) {
+        if(users[id]['password'] === password) {
+          passed = true;
+          res.cookie('user', users[id]);
+        }
+
+      }
+    }
+  }
+
+  if (passed === false) {
+    res.sendStatus(403)
+
+  } else {
+   res.redirect('/');
+  }
 });
 
 app.post('/logout', (req, res) => {
@@ -85,7 +103,7 @@ app.post('/logout', (req, res) => {
 
 app.get("/", (req, res) => {
   let templateVars = {
-  user: req.cookies["user"],
+  user: req.cookies["user"]
 };
   res.end("Hello!", templateVars);
 });
