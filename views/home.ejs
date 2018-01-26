@@ -18,7 +18,7 @@
     <% for (shortUrl in urlDatabase[userid]) {%>
     <tr>
       <td><a href="<%= `/u/${shortUrl}` %>"><%= shortUrl %></a></td>
-      <td><a href='<%= urlDatabase[userid][shortUrl]['longURL']%>'><%= urlDatabase[userid][shortUrl]['longURL']%></a></td>
+      <td><a href='<%= `/u/${shortUrl}` %>'><%= urlDatabase[userid][shortUrl]['longURL']%></a></td>
       <td><%= urlDatabase[userid][shortUrl]['visits']%></td>
     </tr>
     <% }%>

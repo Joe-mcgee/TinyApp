@@ -289,7 +289,7 @@ app.get("/u/:shortURL", (req, res) => {
   for (userid in urlDatabase) {
     for (shortUrl in urlDatabase[userid]) {
       if (shortUrl === req.params.shortURL) {
-        console.log(urlDatabase[userid][shortUrl]['longURL'])
+        urlDatabase[userid][shortUrl]['visits'] += 1;
         res.redirect(urlDatabase[userid][shortUrl]['longURL']);
         return;
       }
