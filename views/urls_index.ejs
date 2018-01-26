@@ -10,14 +10,17 @@
   <tr>
     <th>Shortened From</th>
     <th>Original Url</th>
+    <th>Options</th>
+    <th>Views</th>
   </tr>
   <% for (var url in urls) { %>
     <tr>
-      <td><%= url %></td>
-      <td><a href='<%= urls[url]%>'><%= urls[url]%></td>
+      <td><a href='<%=`/u/${url}`%>'><%= url %></td>
+      <td><a href='<%=`/u/${url}`%>'><%= urls[url]%></td>
       <td><form method="POST" action='urls/<%=url%>/delete?_method=DELETE' id="delete<%= url%>"></form>
       <a href='/urls/<%= url %>'>Update</a>
       <button type='submit' type='text' name='delete' form="delete<%= url %>">Delete</button></td>
+      <td><%= urlDatabase[user][url]['visits']%></td>
     </tr>
   <% } %>
 </table>

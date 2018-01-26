@@ -186,9 +186,18 @@ app.get("/urls", (req, res) => {
     return;
   }
   let urls = getUrls(user);
-  const templateVars = { urls: urls, 'user': req.session['user_id'], currentUrl: 'urls', status: 'logged in' };
+  const templateVars = {
+    urls: urls,
+    'user': req.session['user_id'],
+    currentUrl: 'urls',
+    status: 'logged in',
+    'urlDatabase': urlDatabase
+  };
+
   res.render("urls_index", templateVars);
 });
+
+
 
 app.get("/urls/:id", (req, res) => {
 
