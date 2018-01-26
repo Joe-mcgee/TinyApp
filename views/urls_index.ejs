@@ -12,6 +12,7 @@
     <th>Original Url</th>
     <th>Options</th>
     <th>Views</th>
+    <th>Sessions</th>
   </tr>
   <% for (var url in urls) { %>
     <tr>
@@ -20,7 +21,8 @@
       <td><form method="POST" action='urls/<%=url%>/delete?_method=DELETE' id="delete<%= url%>"></form>
       <a href='/urls/<%= url %>'>Update</a>
       <button type='submit' type='text' name='delete' form="delete<%= url %>">Delete</button></td>
-      <td><%= urlDatabase[user][url]['visits']%></td>
+      <td><%= urlDatabase[user][url]['visits'] %></td>
+      <td><%= urlDatabase[user][url]['sessions'].length %></td>
     </tr>
   <% } %>
 </table>

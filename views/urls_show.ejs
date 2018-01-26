@@ -7,13 +7,25 @@
 <%- include ./partials/__header.ejs %>
 <table>
   <tr>
-    <th>ShortURL: </th>
-    <td><%= shortURL %></td>
+    <th>ShortURL: <%= shortURL %> </th>
+    <th>Options</th>
   </tr>
   <tr>
     <td><form method='POST' action='<%= shortURL %>?_method=PUT' id='Update'><input type='text' name='newurl' value='<%= longURL%>'> </form></td>
     <td><button type='submit' name='' form='Update'>Update</button></td>
   </tr>
+</table>
+<table>
+<tr>
+  <th>Timestamp By: </th>
+  <th>User ID</th>
+</tr>
+<% for (timestamp in urlDatabase[user][shortURL]['time-stamps']) {%>
+  <tr>
+    <td><%= timestamp%></td>
+    <td><%= urlDatabase[user][shortURL]['time-stamps'][timestamp]%></td>
+  </tr>
+<% } %>
 </table>
 
 </body>

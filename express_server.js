@@ -3,6 +3,9 @@ const cookieSession = require('cookie-session');
 const bodyParser = require("body-parser");
 const bcrypt = require('bcrypt');
 const methodOverride = require('method-override');
+const time = require('express-timestamp')
+
+
 const app = express();
 const PORT = process.env.PORT || 8080;
 
@@ -13,31 +16,35 @@ app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2']
 }));
+app.use(time.init)
 app.use(methodOverride('_method'));
 
 // DB
 const urlDatabase = {
-  'userRandomID': {
+  /*'userRandomID': {
     "b2xVn2": {
       longURL: "http://www.lighthouselabs.ca",
-      visits: 0
+      visits: 0,
+      sessions: []
     },
     "c3vVn3": {
       longURL: 'http://www.apple.com',
-      visits: 0
+      visits: 0,
+      sessions: []
     }
   },
   'user2RandomID': {
     "9sm5xK": {
       longURL: "http://www.google.com",
-      visits: 0
+      visits: 0,
+      sessions: []
     }
-  }
+  }*/
 };
 
 
 const users = {
-  "userRandomID": {
+  /*"userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
     password: "purple-monkey-dinosaur"
@@ -46,7 +53,7 @@ const users = {
     id: "user2RandomID",
     email: "user2@example.com",
     password: "dishwasher-funk"
-  }
+  }*/
 };
 
 //HelperFn's
@@ -138,7 +145,7 @@ app.post('/login', (req, res) => {
       if (users[list]['email'] === email) {
         if (bcrypt.compareSync(password, users[list]['password'])) {
           passed = true;
-          req.session.user_id = users[list];
+          req.session.user_id = users[list]['id'];
         }
 
       }
@@ -187,7 +194,7 @@ app.get("/urls", (req, res) => {
   }
   let urls = getUrls(user);
   const templateVars = {
-    urls: urls,
+    'urls': urls,
     'user': req.session['user_id'],
     currentUrl: 'urls',
     status: 'logged in',
@@ -200,8 +207,8 @@ app.get("/urls", (req, res) => {
 
 
 app.get("/urls/:id", (req, res) => {
-
   let templateVars = {
+    urlDatabase: urlDatabase,
     shortURL: req.params.id,
     user: req.session['user_id'],
     status: 'logged in',
@@ -269,6 +276,7 @@ app.post("/urls", (req, res) => {
   const templateVars = {
     user: req.session["user_id"]
   };
+
   let random = generateRandomString();
   const input = req.body['longURL'];
   const httpRegex = RegExp('^http://');
@@ -276,12 +284,17 @@ app.post("/urls", (req, res) => {
   if (httpRegex.test(input)) {
     urlDatabase[templateVars['user']][random] = {
       'longURL': input,
-      'visits': 0
-    }
+      'visits': 0,
+      'sessions': [],
+      'time-stamps': {}
+
+    };
   } else {
     urlDatabase[templateVars['user']][random] = {
       'longURL': 'http://' + input,
-      'visits': 0
+      'visits': 0,
+      'sessions': [],
+      'time-stamps': {}
     };
   }
   res.redirect(`urls/`);
@@ -299,6 +312,12 @@ app.get("/u/:shortURL", (req, res) => {
     for (shortUrl in urlDatabase[userid]) {
       if (shortUrl === req.params.shortURL) {
         urlDatabase[userid][shortUrl]['visits'] += 1;
+        if (!urlDatabase[userid][shortUrl]['sessions'].includes(req.session['user_id'])) {
+          urlDatabase[userid][shortUrl]['sessions'].push(req.session['user_id']);
+        }
+        urlDatabase[userid][shortUrl]['time-stamps'][req.timestamp] = req.session['user_id'];
+
+
         res.redirect(urlDatabase[userid][shortUrl]['longURL']);
         return;
       }

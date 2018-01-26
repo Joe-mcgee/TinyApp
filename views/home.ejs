@@ -6,6 +6,11 @@
 <body>
 <p>Hello! Welcome to TinyApp, a url shortener for twitterers who like to link long urls and still want space! </p>
 <p><a href='/login'>Login</a></p>
+<% if (typeof user !== 'undefined') {%>
+<form method="POST" action="/logout" id='logout'></form>
+<button type='submit' form='logout'>Logout</button>
+<% } %>
+
 <p><a href='/register'>Register</a></p>
 
 <table>
