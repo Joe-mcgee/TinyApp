@@ -13,16 +13,28 @@ app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2']
 }));
-app.use(methodOverride('_method'))
+app.use(methodOverride('_method'));
 
 // DB
 const urlDatabase = {
   'userRandomID': {
-    "b2xVn2": "http://www.lighthouselabs.ca",
-    "c3vVn3": 'http://www.apple.com'
+    "b2xVn2": {
+      longURL: "http://www.lighthouselabs.ca",
+      visits: 0
+    },
+    "c3vVn3": {
+      longURL: 'http://www.apple.com',
+      visits: 0
+    }
   },
-  'user2RandomID': { "9sm5xK": "http://www.google.com" }
+  'user2RandomID': {
+    "9sm5xK": {
+      longURL: "http://www.google.com",
+      visits: 0
+    }
+  }
 };
+
 
 const users = {
   "userRandomID": {
@@ -39,12 +51,13 @@ const users = {
 
 //HelperFn's
 function getUrls(user) {
-  let output;
-  for (id in urlDatabase) {
-    if (user === id) {
-      output = (urlDatabase[id]);
-    }
+  let output = {};
+
+  for (shortUrl in urlDatabase[user]) {
+    output[shortUrl] = urlDatabase[user][shortUrl]['longURL'];
+
   }
+
   return output;
 }
 
@@ -186,18 +199,21 @@ app.get("/urls/:id", (req, res) => {
     currentUrl: '/url/:id'
   };
   // protect against access without session cookie
+
   try {
-    templateVars['longURL'] = urlDatabase[req.session['user_id']][req.params.id];
+    templateVars['longURL'] = urlDatabase[req.session['user_id']][templateVars['shortURL']]['longURL'];
   } catch (e) {
     res.redirect('/login');
     return;
   }
   let pass = false;
-  for (id in urlDatabase) {
-    let targetId = id;
-    for (list in urlDatabase[id]) {
-      if (templateVars['shortURL'] === list) {
-        if (targetId === templateVars['user']) {
+  for (userid in urlDatabase) {
+    let targetId = userid;
+
+    for (shortUrl in urlDatabase[userid]) {
+      if (templateVars['shortURL'] === shortUrl) {
+
+        if (userid === templateVars['user']) {
           pass = true;
           res.render("urls_show", templateVars);
         }
@@ -215,7 +231,7 @@ app.put("/urls/:id", (req, res) => {
     status: 'logged in',
     currentUrl: '/urls/:id'
   };
-  urlDatabase[templateVars['user']][req.params.id] = req.body.newurl;
+  urlDatabase[templateVars['user']][req.params.id]['longURL'] = req.body.newurl;
   res.redirect('/urls');
 });
 
@@ -223,12 +239,12 @@ app.delete("/urls/:id/delete", (req, res) => {
   const templateVars = { user: req.session['user_id'], shortURL: req.params.id };
   //protect against delete from unauthorized user
   let pass = false;
-  for (id in urlDatabase) {
-    for (list in urlDatabase[id]) {
-      if (templateVars['shortURL'] === list) {
-        if (id === templateVars['user']) {
+  for (userid in urlDatabase) {
+    for (shortUrl in urlDatabase[userid]) {
+      if (templateVars['shortURL'] === shortUrl) {
+        if (userid === templateVars['user']) {
           pass = true;
-          delete urlDatabase[id][templateVars['shortURL']];
+          delete urlDatabase[userid][templateVars['shortURL']];
           res.redirect('/urls');
           return;
         }
@@ -249,11 +265,13 @@ app.post("/urls", (req, res) => {
   const httpRegex = RegExp('^http://');
   //adds http:// if not added to url
   if (httpRegex.test(input)) {
-    urlDatabase[templateVars['user']][random] = input;
+    urlDatabase[templateVars['user']][random] = {'longURL' : input,
+                                                  'visits': 0}
   } else {
-    urlDatabase[templateVars['user']][random] = 'http://' + input;
+    urlDatabase[templateVars['user']][random] = {'longURL' : 'http://' + input,
+                                                  'visits': 0};
   }
-  res.redirect(`urls/${random}`);
+  res.redirect(`urls/`);
 });
 
 app.get("/u/:shortURL", (req, res) => {
@@ -264,10 +282,10 @@ app.get("/u/:shortURL", (req, res) => {
   };
 
   //allows for redirects from all
-  for (id in urlDatabase) {
-    for (list in urlDatabase[id]) {
-      if (list === req.params.shortURL) {
-        res.redirect(urlDatabase[id][list]);
+  for (userid in urlDatabase) {
+    for (shortUrl in urlDatabase[userid]) {
+      if (shortUrl === req.params.shortURL) {
+        res.redirect(urlDatabase[userid][shortURL]['longURL']);
         return;
       }
     }

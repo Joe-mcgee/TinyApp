@@ -12,12 +12,14 @@
   <tr>
     <th>Shortened Key</th>
     <th>Full Url to shortened website</th>
+    <th>Views</th>
   </tr>
-  <% for (id in urlDatabase) { %>
-    <% for (key in urlDatabase[id]) {%>
+  <% for (userid in urlDatabase) { %>
+    <% for (shortUrl in urlDatabase[userid]) {%>
     <tr>
-      <td><a href="<%= `/u/${key}` %>"><%= key %></a></td>
-      <td><a href='<%= urlDatabase[id][key]%>'><%= urlDatabase[id][key]%></a></td>
+      <td><a href="<%= `/u/${shortUrl}` %>"><%= shortUrl %></a></td>
+      <td><a href='<%= urlDatabase[userid][shortUrl]['longURL']%>'><%= urlDatabase[userid][shortUrl]['longURL']%></a></td>
+      <td><%= urlDatabase[userid][shortUrl]['visits']%></td>
     </tr>
     <% }%>
   <%}%>

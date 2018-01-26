@@ -16,7 +16,7 @@
       <td><%= url %></td>
       <td><a href='<%= urls[url]%>'><%= urls[url]%></td>
       <td><form method="POST" action='urls/<%=url%>/delete?_method=DELETE' id="delete<%= url%>"></form>
-      <a href='urls/<%= url %>'>Update</a>
+      <a href='/urls/<%= url %>'>Update</a>
       <button type='submit' type='text' name='delete' form="delete<%= url %>">Delete</button></td>
     </tr>
   <% } %>
