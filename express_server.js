@@ -53,11 +53,21 @@ function generateRandomString() {
 
 
 app.get('/register', (req, res) => {
+   if (req.session.user_id) {
+    res.redirect('urls')
+    return;
+  }
 
-  res.render('register');
+  let templateVars = {
+    currentUrl: 'register',
+    status: 'logged out'
+  }
+  res.render('register', templateVars);
 });
 
 app.post('/register', (req, res) => {
+
+
   let randomId = generateRandomString();
   let email = req.body.email;
   let password = req.body.password;
@@ -74,19 +84,23 @@ app.post('/register', (req, res) => {
       }
     }
   }
-  passed =true
+  passed = true
   if (passed = true) {
-  req.session.user_id = randomId;
-  users[randomId] = { id: req.session.user_id, email: req.body.email, password: hashedPassword };
-  urlDatabase[randomId] = {};
-  res.redirect('urls');
-}
+    req.session.user_id = randomId;
+    users[randomId] = { id: req.session.user_id, email: req.body.email, password: hashedPassword };
+    urlDatabase[randomId] = {};
+    res.redirect('urls');
+  }
 
 });
 
 
 app.get('/login', (req, res) => {
-  res.render('login');
+  let templateVars = {
+    status: 'logged out',
+    currentUrl: '/login'
+  }
+  res.render('login', templateVars);
 });
 
 app.post('/login', (req, res) => {
@@ -106,15 +120,15 @@ app.post('/login', (req, res) => {
   }
 
   if (passed === false) {
-    res.sendStatus(403);
-
+    res.redirect('login');
+    return
   } else {
-    res.redirect('/');
+    res.redirect('/urls');
   }
 });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('user_id');
+  req.session = null;
   res.redirect('/login');
 });
 
@@ -122,7 +136,7 @@ app.get("/", (req, res) => {
   let templateVars = {
     user: req.session["user_id"]
   };
-  res.end("Hello!", templateVars);
+  res.render('home', templateVars);
 });
 
 app.get("/urls.json", (req, res) => {
@@ -134,7 +148,9 @@ app.get("/urls.json", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    user: req.session["user_id"]
+    user: req.session["user_id"],
+    status: 'logged in',
+    currentUrl: 'urls/new',
 
   };
   if (typeof templateVars['user'] === 'undefined') {
@@ -152,12 +168,25 @@ app.get("/hello", (req, res) => {
 app.get("/urls", (req, res) => {
   let user = req.session['user_id'];
   let urls = getUrls(user);
-  let templateVars = { urls: urls, 'user': req.session['user_id'] };
+  let templateVars = { urls: urls, 'user': req.session['user_id'], currentUrl: 'urls', status: 'logged in' };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
-  let templateVars = { shortURL: req.params.id, longURL: urlDatabase[req.session['user_id']][req.params.id], user: req.session['user_id'] };
+
+  try {
+  let templateVars = {
+    shortURL: req.params.id,
+    longURL: urlDatabase[req.session['user_id']][req.params.id],
+    user: req.session['user_id'],
+    status: 'logged in',
+    currentUrl: '/url/:id'
+  };
+} catch (e) {
+  res.redirect('/login')
+  return
+}
+
   let pass = false;
   for (id in urlDatabase) {
     let targetId = id;
@@ -179,7 +208,12 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.post("/urls/:id", (req, res) => {
-  let templateVars = { user: req.session['user_id'] }
+  let templateVars = {
+    user: req.session['user_id'],
+    status: 'logged in',
+    currentUrl: '/urls/:id'
+  }
+
 
   urlDatabase[templateVars['user']][req.params.id] = req.body.newurl
   res.redirect('/urls');
@@ -229,16 +263,20 @@ app.post("/urls", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   let templateVars = {
-    user: req.session["user_id"]
+    user: req.session["user_id"],
+    status: 'global',
+    currentUrl: '/u/:shortURL'
   };
 
   for (id in urlDatabase) {
     for (list in urlDatabase[id]) {
       if (list === req.params.shortURL) {
         res.redirect(urlDatabase[id][list])
+        return
       }
     }
   }
+  res.sendStatus(404)
 });
 
 app.listen(PORT, () => {
