@@ -58,32 +58,30 @@ app.get('/register', (req, res) => {
 });
 
 app.post('/register', (req, res) => {
-  console.log(users)
   let randomId = generateRandomString();
   let email = req.body.email;
   let password = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, 10)
-  let passed = true;
-  if (email !== '' || password !== '') {
+  let passed = false;
+  if (email === '' || password === '') {
+    res.redirect('register')
+    return;
+  } else {
     for (id in users) {
       if (users[id]['email'] === email) {
-        passed = false;
+        res.redirect('register')
+        return
       }
     }
   }
-
-  if (passed === true) {
+  passed =true
+  if (passed = true) {
   req.session.user_id = randomId;
-    users[randomId] = { id: req.session.user_id, email: req.body.email, password: hashedPassword };
-    urlDatabase[randomId] = {}
-    console.log(users)
+  users[randomId] = { id: req.session.user_id, email: req.body.email, password: hashedPassword };
+  urlDatabase[randomId] = {};
+  res.redirect('urls');
+}
 
-    res.redirect('urls');
-
-  } else {
-    res.sendStatus(400);
-    res.redirect('register');
-  }
 });
 
 
@@ -96,11 +94,11 @@ app.post('/login', (req, res) => {
   let password = req.body.password;
   let passed = false;
   if (email !== '' || password !== '') {
-    for (id in users) {
-      if (users[id]['email'] === email) {
+    for (list in users) {
+      if (users[list]['email'] === email) {
         if (bcrypt.compareSync(password, users[id]['password'])) {
           passed = true;
-          req.session.user_id(users[id]);
+          req.session.user_id = users[list];
         }
 
       }
@@ -139,7 +137,6 @@ app.get("/urls/new", (req, res) => {
     user: req.session["user_id"]
 
   };
-  console.log(templateVars['user']);
   if (typeof templateVars['user'] === 'undefined') {
     res.redirect('/login');
   } else {
@@ -182,7 +179,7 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.post("/urls/:id", (req, res) => {
-  let templateVars = {user: req.session['user_id']}
+  let templateVars = { user: req.session['user_id'] }
 
   urlDatabase[templateVars['user']][req.params.id] = req.body.newurl
   res.redirect('/urls');
@@ -190,16 +187,18 @@ app.post("/urls/:id", (req, res) => {
 });
 
 app.post("/urls/:id/delete", (req, res) => {
-let templateVars = {user: req.session['user_id'], shortURL: req.params.id};
-let pass = false;
+  let templateVars = { user: req.session['user_id'], shortURL: req.params.id };
+  let pass = false;
   for (id in urlDatabase) {
-    let targetId = id;
     for (list in urlDatabase[id]) {
+
       if (templateVars['shortURL'] === list) {
-        if (targetId === templateVars['user']['id']) {
+
+        if (id === templateVars['user']) {
           pass = true;
-          delete urlDatabase[templateVars['user']['id']][req.params.id];
+          delete urlDatabase[id][templateVars['shortURL']]
           res.redirect('/urls');
+          return;
         }
       }
     }
@@ -207,10 +206,6 @@ let pass = false;
   if (!pass) {
     res.redirect('/urls');
   }
-
-
-
-
 
 });
 
