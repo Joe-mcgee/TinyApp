@@ -53,16 +53,21 @@ function generateRandomString() {
 
 
 app.get('/register', (req, res) => {
-   if (req.session.user_id) {
-    res.redirect('urls')
-    return;
-  }
 
   let templateVars = {
     currentUrl: 'register',
-    status: 'logged out'
+    status: 'logged out',
+    user: req.session.user_id
+  };
+
+  if(typeof templateVars['user'] === 'undefined') {
+    res.render('register', templateVars);
+    return
+  } else {
+    res.redirect('urls')
   }
-  res.render('register', templateVars);
+
+
 });
 
 app.post('/register', (req, res) => {
@@ -129,12 +134,13 @@ app.post('/login', (req, res) => {
 
 app.post('/logout', (req, res) => {
   req.session = null;
-  res.redirect('/login');
+  res.redirect('/');
 });
 
 app.get("/", (req, res) => {
   let templateVars = {
-    user: req.session["user_id"]
+    user: req.session["user_id"],
+    urlDatabase: urlDatabase
   };
   res.render('home', templateVars);
 });

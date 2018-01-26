@@ -7,5 +7,20 @@
 <p>Hello! Welcom to Tiny app, a url shortener for twitterers who like to link long urls and still want space! </p>
 <p><a href='/login'>Login</a></p>
 <p><a href='/register'>Register</a></p>
+
+<table>
+  <tr>
+    <th>Shortened Key</th>
+    <th>Full Url to shortened website</th>
+  </tr>
+  <% for (id in urlDatabase) { %>
+    <% for (key in urlDatabase[id]) {%>
+    <tr>
+      <td><a href="<%= `/u/${key}` %>"><%= key %></a></td>
+      <td><a href='<%= urlDatabase[id][key]%>'><%= urlDatabase[id][key]%></a></td>
+    </tr>
+    <% }%>
+  <%}%>
+</table>
 </body>
 </html>
