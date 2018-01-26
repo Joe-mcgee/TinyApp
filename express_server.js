@@ -83,7 +83,7 @@ app.post('/register', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, 10);
-  const passed = false;
+  let passed = false;
   // handles improper input
   if (email === '' || password === '') {
     res.redirect('register');
@@ -104,9 +104,7 @@ app.post('/register', (req, res) => {
     urlDatabase[randomId] = {};
     res.redirect('urls');
   }
-
 });
-
 
 app.get('/login', (req, res) => {
   const templateVars = {
@@ -146,7 +144,6 @@ app.post('/logout', (req, res) => {
   res.redirect('/');
 });
 
-
 app.get("/urls.json", (req, res) => {
   let templateVars = {
     user: req.session["user_id"]
@@ -159,7 +156,6 @@ app.get("/urls/new", (req, res) => {
     user: req.session["user_id"],
     status: 'logged in',
     currentUrl: 'urls/new'
-
   };
   //protect against unauthorized access
   if (typeof templateVars['user'] === 'undefined') {
@@ -172,8 +168,8 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls", (req, res) => {
   const user = req.session['user_id'];
   if (typeof user === 'undefined') {
-    res.redirect('/')
-    return
+    res.redirect('/');
+    return;
   }
   let urls = getUrls(user);
   const templateVars = { urls: urls, 'user': req.session['user_id'], currentUrl: 'urls', status: 'logged in' };
@@ -182,20 +178,19 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/:id", (req, res) => {
 
-// protect against access without session cookie
+  let templateVars = {
+    shortURL: req.params.id,
+    user: req.session['user_id'],
+    status: 'logged in',
+    currentUrl: '/url/:id'
+  };
+  // protect against access without session cookie
   try {
-    const templateVars = {
-      shortURL: req.params.id,
-      longURL: urlDatabase[req.session['user_id']][req.params.id],
-      user: req.session['user_id'],
-      status: 'logged in',
-      currentUrl: '/url/:id'
-    };
+    templateVars['longURL'] = urlDatabase[req.session['user_id']][req.params.id];
   } catch (e) {
     res.redirect('/login');
     return;
   }
-
   let pass = false;
   for (id in urlDatabase) {
     let targetId = id;
@@ -211,9 +206,6 @@ app.get("/urls/:id", (req, res) => {
   if (!pass) {
     res.sendStatus(403);
   }
-
-
-
 });
 
 app.post("/urls/:id", (req, res) => {
@@ -222,11 +214,8 @@ app.post("/urls/:id", (req, res) => {
     status: 'logged in',
     currentUrl: '/urls/:id'
   };
-
-
   urlDatabase[templateVars['user']][req.params.id] = req.body.newurl;
   res.redirect('/urls');
-
 });
 
 app.post("/urls/:id/delete", (req, res) => {
@@ -257,7 +246,6 @@ app.post("/urls", (req, res) => {
   let random = generateRandomString();
   const input = req.body['longURL'];
   const httpRegex = RegExp('^http://');
-
   //adds http:// if not added to url
   if (httpRegex.test(input)) {
     urlDatabase[templateVars['user']][random] = input;

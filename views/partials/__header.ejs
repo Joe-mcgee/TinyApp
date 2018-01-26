@@ -1,11 +1,11 @@
 <h1>TinyApp</h1>
 <% if (status != 'logged in') {%>
-<p><a href='/login'>Login</a></p>
-<p><a href='/register'>Register</a></p>
+  <p><a href='/login'>Login</a></p>
+  <p><a href='/register'>Register</a></p>
 <% } %>
-<% if (status !== 'logged out') {%>
- <form method="POST" action="/logout" id='logoutForm'>
-  </form>
+  <% if (status !== 'logged out') {%>
+    <form method="POST" action="/logout" id='logoutForm'>
+    </form>
  <button type='submit' form='logoutForm'>Logout</button>
 
-<% }%>
+  <% }%>
