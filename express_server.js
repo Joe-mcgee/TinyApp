@@ -96,7 +96,7 @@ app.post('/register', (req, res) => {
   let randomId = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
-  const hashedPassword = bcrypt.hashSync(password, 10);
+  const hashedPassword = bcrypt.hashSync(req.body.password, 10);
   let passed = false;
   // handles improper input
   if (email === '' || password === '') {
@@ -136,7 +136,7 @@ app.post('/login', (req, res) => {
   if (email !== '' || password !== '') {
     for (list in users) {
       if (users[list]['email'] === email) {
-        if (bcrypt.compareSync(password, users[id]['password'])) {
+        if (bcrypt.compareSync(password, users[list]['password'])) {
           passed = true;
           req.session.user_id = users[list];
         }
@@ -265,11 +265,15 @@ app.post("/urls", (req, res) => {
   const httpRegex = RegExp('^http://');
   //adds http:// if not added to url
   if (httpRegex.test(input)) {
-    urlDatabase[templateVars['user']][random] = {'longURL' : input,
-                                                  'visits': 0}
+    urlDatabase[templateVars['user']][random] = {
+      'longURL': input,
+      'visits': 0
+    }
   } else {
-    urlDatabase[templateVars['user']][random] = {'longURL' : 'http://' + input,
-                                                  'visits': 0};
+    urlDatabase[templateVars['user']][random] = {
+      'longURL': 'http://' + input,
+      'visits': 0
+    };
   }
   res.redirect(`urls/`);
 });
@@ -285,7 +289,8 @@ app.get("/u/:shortURL", (req, res) => {
   for (userid in urlDatabase) {
     for (shortUrl in urlDatabase[userid]) {
       if (shortUrl === req.params.shortURL) {
-        res.redirect(urlDatabase[userid][shortURL]['longURL']);
+        console.log(urlDatabase[userid][shortUrl]['longURL'])
+        res.redirect(urlDatabase[userid][shortUrl]['longURL']);
         return;
       }
     }
