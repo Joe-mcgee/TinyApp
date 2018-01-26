@@ -2,7 +2,7 @@ const express = require("express");
 const cookieSession = require('cookie-session');
 const bodyParser = require("body-parser");
 const bcrypt = require('bcrypt');
-
+const methodOverride = require('method-override');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
@@ -13,6 +13,7 @@ app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2']
 }));
+app.use(methodOverride('_method'))
 
 // DB
 const urlDatabase = {
@@ -208,7 +209,7 @@ app.get("/urls/:id", (req, res) => {
   }
 });
 
-app.post("/urls/:id", (req, res) => {
+app.put("/urls/:id", (req, res) => {
   const templateVars = {
     user: req.session['user_id'],
     status: 'logged in',
@@ -218,7 +219,7 @@ app.post("/urls/:id", (req, res) => {
   res.redirect('/urls');
 });
 
-app.post("/urls/:id/delete", (req, res) => {
+app.delete("/urls/:id/delete", (req, res) => {
   const templateVars = { user: req.session['user_id'], shortURL: req.params.id };
   //protect against delete from unauthorized user
   let pass = false;

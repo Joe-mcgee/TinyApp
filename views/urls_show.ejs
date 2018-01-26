@@ -11,7 +11,7 @@
     <td><%= shortURL %></td>
   </tr>
   <tr>
-    <td><form method='POST' action='<%= shortURL %>' id='Update'><input type='text' name='newurl' value='<%= longURL%>'> </form></td>
+    <td><form method='POST' action='<%= shortURL %>?_method=PUT' id='Update'><input type='text' name='newurl' value='<%= longURL%>'> </form></td>
     <td><button type='submit' name='' form='Update'>Update</button></td>
   </tr>
 </table>
