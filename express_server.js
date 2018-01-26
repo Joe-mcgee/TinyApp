@@ -250,7 +250,7 @@ app.post("/urls", (req, res) => {
   if (httpRegex.test(input)) {
     urlDatabase[templateVars['user']][random] = input;
   } else {
-    urlDatabase[random] = 'http://' + input;
+    urlDatabase[templateVars['user']][random] = 'http://' + input;
   }
   res.redirect(`urls/${random}`);
 });
