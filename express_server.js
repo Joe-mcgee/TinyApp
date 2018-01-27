@@ -3,7 +3,7 @@ const cookieSession = require('cookie-session');
 const bodyParser = require("body-parser");
 const bcrypt = require('bcrypt');
 const methodOverride = require('method-override');
-const time = require('express-timestamp')
+const time = require('express-timestamp');
 
 
 const app = express();
@@ -16,35 +16,38 @@ app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2']
 }));
-app.use(time.init)
+app.use(time.init);
 app.use(methodOverride('_method'));
 
 // DB
 const urlDatabase = {
-  /*'userRandomID': {
+  'userRandomID': {
     "b2xVn2": {
       longURL: "http://www.lighthouselabs.ca",
       visits: 0,
-      sessions: []
+      sessions: [],
+      'time-stamps': {}
     },
     "c3vVn3": {
       longURL: 'http://www.apple.com',
       visits: 0,
-      sessions: []
+      sessions: [],
+      'time-stamps': {}
     }
   },
   'user2RandomID': {
     "9sm5xK": {
       longURL: "http://www.google.com",
       visits: 0,
-      sessions: []
+      sessions: [],
+      'time-stamps': {}
     }
-  }*/
+  }
 };
 
 
 const users = {
-  /*"userRandomID": {
+  "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
     password: "purple-monkey-dinosaur"
@@ -53,7 +56,7 @@ const users = {
     id: "user2RandomID",
     email: "user2@example.com",
     password: "dishwasher-funk"
-  }*/
+  }
 };
 
 //HelperFn's
@@ -107,12 +110,12 @@ app.post('/register', (req, res) => {
   let passed = false;
   // handles improper input
   if (email === '' || password === '') {
-    res.redirect('register');
+    res.send('pleasure do not leave any of this fields empty!');
     return;
   } else {
     for (id in users) {
       if (users[id]['email'] === email) {
-        res.redirect('register');
+        res.send('please enter a valid email');
         return;
       }
     }
@@ -153,7 +156,7 @@ app.post('/login', (req, res) => {
   }
   // if login fails
   if (passed === false) {
-    res.redirect('login');
+    res.send('please enter a valid username and or password');
     return;
   } else {
     res.redirect('/urls');
@@ -247,8 +250,13 @@ app.put("/urls/:id", (req, res) => {
     status: 'logged in',
     currentUrl: '/urls/:id'
   };
-  urlDatabase[templateVars['user']][req.params.id]['longURL'] = req.body.newurl;
-  res.redirect('/urls');
+  if (typeof user === 'undefined') {
+    urlDatabase[templateVars['user']][req.params.id]['longURL'] = req.body.newurl;
+    res.redirect('/urls');
+  } else {
+    res.send('not yours to edit, pal');
+    return;
+  }
 });
 
 app.delete("/urls/:id/delete", (req, res) => {
@@ -280,6 +288,7 @@ app.post("/urls", (req, res) => {
   let random = generateRandomString();
   const input = req.body['longURL'];
   const httpRegex = RegExp('^http://');
+  const wwwRegex = RegExp('^www.');
   //adds http:// if not added to url
   if (httpRegex.test(input)) {
     urlDatabase[templateVars['user']][random] = {
@@ -289,13 +298,21 @@ app.post("/urls", (req, res) => {
       'time-stamps': {}
 
     };
-  } else {
+  } else if (wwwRegex.test(input)) {
     urlDatabase[templateVars['user']][random] = {
       'longURL': 'http://' + input,
       'visits': 0,
       'sessions': [],
       'time-stamps': {}
     };
+  } else if (!wwwRegex.test(false)) {
+    urlDatabase[templateVars['user']][random] = {
+      'longURL': 'http://www.' + input,
+      'visits': 0,
+      'sessions': [],
+      'time-stamps': {}
+    };
+
   }
   res.redirect(`urls/`);
 });
